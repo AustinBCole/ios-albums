@@ -10,12 +10,15 @@ import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    var albumController = AlbumController()
 
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        AlbumController().testDecodingExampleAlbum()
+        albumController.testDecodingExampleAlbum()
+        albumController.testEncodingExampleAlbum()
         return true
     }
 

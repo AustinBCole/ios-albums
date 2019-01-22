@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Album: Decodable {
+struct Album: Codable {
     
     enum AlbumKeys: String, CodingKey {
         case artist
@@ -29,6 +29,24 @@ struct Album: Decodable {
     let id: String
     let name: String
     let songs: [Song]
+    
+    struct Song: Codable {
+        
+        enum SongKeys: String, CodingKey {
+            case duration
+            case id
+            case name
+            
+            enum NameKeys: String, CodingKey {
+                case title
+            }
+        }
+        
+        var duration: String
+        var id: String
+        var name: String
+        
+    }
     
     init(from decoder: Decoder) throws {
         
@@ -59,34 +77,48 @@ struct Album: Decodable {
             
             let durationContainer = try keyedSongsContainer.nestedContainer(keyedBy: Song.SongKeys.self, forKey: .duration)
        let duration = try durationContainer.decode(String.self, forKey: .duration)
-            print(duration)
             
         let id = try keyedSongsContainer.decode(String.self, forKey: .id)
-            print(id)
             
             let nameContainer = try keyedSongsContainer.nestedContainer(keyedBy: Song.SongKeys.NameKeys.self, forKey: .name)
             let name = try nameContainer.decode(String.self, forKey: .title)
-            print(name)
             newSongs.append(Song(duration: duration, id: id, name: name))
         }
         songs = newSongs
     }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: AlbumKeys.self)
         
-    struct Song: Decodable {
-        
-        enum SongKeys: String, CodingKey {
-            case duration
-            case id
-            case name
-            
-            enum NameKeys: String, CodingKey {
-                case title
-            }
+        try container.encode(artist, forKey: .artist)
+        try container.encode(id, forKey: .id)
+        for genre in genres {
+            try container.encode(genre, forKey: .genres)
         }
         
-        var duration: String
-        var id: String
-        var name: String
+        var coverArtContainer = container.nestedUnkeyedContainer(forKey: .coverArt)
+        var coverArtKeyedContainer = coverArtContainer.nestedContainer(keyedBy: AlbumKeys.CoverArtKeys.self)
+        for url in coverArt {
+            try coverArtKeyedContainer.encode(url, forKey: .url)
+        }
         
+        var nameContainer = container.nestedContainer(keyedBy: AlbumKeys.self, forKey: .name)
+        try nameContainer.encode(name, forKey: .name)
+        
+        var songsContainer = container.nestedUnkeyedContainer(forKey: .songs)
+        var songsKeyedContainer = songsContainer.nestedContainer(keyedBy: Song.SongKeys.self)
+        var songNameContainer = songsKeyedContainer.nestedContainer(keyedBy: Song.SongKeys.NameKeys.self, forKey: .name)
+        for song in songs {
+            try songNameContainer.encode(song.name, forKey: .title)
+        }
+        var songDurationContainer = songsKeyedContainer.nestedContainer(keyedBy: Song.SongKeys.self, forKey: .duration)
+        for song in songs {
+            try songDurationContainer.encode(song.duration, forKey: .duration)
+        }
+        var songIdContainer = songsKeyedContainer.nestedContainer(keyedBy: Song.SongKeys.self, forKey: .id)
+        for song in songs {
+            try songIdContainer.encode(song.id, forKey: .id)
+        }
+        print("success")
     }
 }

@@ -10,6 +10,8 @@ import Foundation
 
 class AlbumController {
     
+    var classAlbum: Album?
+    
     typealias CompletionHandler = (Error?) -> Void
     
     func testDecodingExampleAlbum() {
@@ -17,22 +19,24 @@ class AlbumController {
         let album: Album?
         
         let url = Bundle.main.url(forResource: "exampleAlbum", withExtension: "json")
-        
         do{
         let data = try Data(contentsOf: url!)
-            print(data)
             let decoder = JSONDecoder()
             album = try? decoder.decode(Album.self, from: data)
-            print(album)
+            classAlbum = album
         } catch {
             print("unable to decode.")
         }
-        
-        
-        
-        
-        
-        
+    }
+    func testEncodingExampleAlbum() {
+        let album = classAlbum
+        do{
+            let jsonEncoder = JSONEncoder()
+            let data = try jsonEncoder.encode(album)
+            print(data)
+        } catch {
+            print("unable to encode.")
+        }
     }
     
 }
